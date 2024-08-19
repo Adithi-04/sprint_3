@@ -1,3 +1,6 @@
+'''
+This module is used to provide the user interface for the code
+'''
 import os
 import tkinter as tk
 from tkinter import filedialog, ttk, messagebox
@@ -26,7 +29,6 @@ def upload_folder():
     folder_selected = filedialog.askdirectory()
     if folder_selected:
         folder_path.set(folder_selected)
-        global selected_folder_path
         selected_folder_path = folder_selected
         process_files(folder_selected)
 
@@ -39,7 +41,6 @@ def process_files(selected_folder):
     If the file is an RTF file, the schema of the file is checked
     If the file adheres to the schema, the file is converted to JSON
     '''
-    global OUTPUT_DIRECTORY, FOLDER_TO_DELETE  # Declare as global variables
     for row in table.get_children():
         table.delete(row)
 
@@ -104,10 +105,7 @@ def user_interface():
     app = tk.Tk()
     app.title("RTF to JSON Converter")
     app.geometry("800x600")
-
-    global folder_path
     folder_path = tk.StringVar()
-
     title_label = tk.Label(app, text="RTF to JSON Converter", font=("Times New Roman", 20, "bold"))
     title_label.place(relx=0.5, rely=0.05, anchor=tk.CENTER)
     subtitle1_label = tk.Label(
@@ -128,7 +126,6 @@ def user_interface():
     upload_button = tk.Button(app, text="UPLOAD RTF FOLDER", command=upload_folder)
     upload_button.place(relx=0.5, rely=0.25, anchor=tk.CENTER)
 
-    global table
     columns = ("File Name", "Status", "Remarks")
     table = ttk.Treeview(app, columns=columns, show="headings")
     table.heading("File Name", text="File Name")
