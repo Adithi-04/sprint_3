@@ -1,3 +1,6 @@
+'''
+This module is used to create the json object for each RTF file
+'''
 import json
 import os
 from datetime import datetime

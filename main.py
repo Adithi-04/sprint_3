@@ -60,5 +60,5 @@ from data_extraction import debug_print
 
 try:
     user_interface()
-except Exception:
+except ImportError as e:
     debug_print("UI unsuccessful")

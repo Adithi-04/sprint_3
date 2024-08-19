@@ -1,8 +1,8 @@
 import re
 from configparser import ConfigParser
 from datetime import datetime
-from json_creation import json_conversion
 import logging
+from json_creation import json_conversion
 
 # Read config.ini file
 config_object = ConfigParser()
@@ -99,6 +99,8 @@ def check_bold(row_content):
     '''
     if RTF_Style_Tags["bold"] in row_content:
         return "YES"
+    else:
+        return ""
 
 def check_italic(row_content):
     '''
@@ -106,27 +108,33 @@ def check_italic(row_content):
     '''
     if RTF_Style_Tags["italic"] in row_content:
         return "YES"
-    
+    else:
+        return ""
+
 def check_underline(row_content):
     '''
     This function is used to check whether a particular segment is underlined 
     '''
     if RTF_Style_Tags["underline"] in row_content:
         return "YES"
-    
+
 def check_superscript(row_content):
     '''
     This function is used to check whether a particular segment is superscript 
     '''
     if RTF_Style_Tags["superscript"] in row_content:
         return "YES"
-    
+    else:
+        return ""
+
 def check_subscript(row_content):
     '''
     This function is used to check whether a particular segment is subscript 
     '''
     if RTF_Style_Tags["subscript"] in row_content:
         return "YES"
+    else:
+        return ""
 
 
 def extract_style_details(row_content):
@@ -134,8 +142,8 @@ def extract_style_details(row_content):
     This function is used to extract the style details of a particular segment
     '''
     global STYLE_LEVEL
-    if (STYLE_LEVEL == "ALL"):
-        style = re.search(RE_expressions['styles'],row_content) 
+    if STYLE_LEVEL == "ALL":
+        style = re.search(RE_expressions['styles'],row_content)
         style_info = {}
         style_info['font'] = extract_font(style)
         style_info['size'] = extract_size(style)
@@ -145,8 +153,10 @@ def extract_style_details(row_content):
         style_info['underline'] = check_underline(row_content)
         style_info['subscript'] = check_subscript(row_content)
         style_info['superscript'] = check_superscript(row_content)
-    
         return style_info
+    else:
+        return ""
+
 def special_characters(rtf_content):
     '''
     This function handles special characters
@@ -296,8 +306,9 @@ def extract_table_data(page_content, column_headers):
         if re.search(r'\\keepn', page_content[trowd[-1]:end_row[-1]]):
             no_of_rows -= 1
         for r in range(no_of_rows):
-            row_data = re.findall(r'{(.+)\\cell}' , page_content[trowd[r]:end_row[r]])
-            row_data = list(filter(None, [re.sub(r"\\\w+" , "" , rd).strip() for rd in row_data]))
+            # row_data = re.findall(r'{(.+)\\cell}' , page_content[trowd[r]:end_row[r]])
+            row_data = re.findall(r'{(.*)\\cell}' , page_content[trowd[r]:end_row[r]])
+            row_data = list( [re.sub(r"\\\w+" , "" , rd).strip() for rd in row_data])
             if row_data :
                 subject_details = {}
                 for i, row_data_values in enumerate(row_data) :
@@ -394,7 +405,6 @@ def convert_rtf(item, file_no, output_directory):
         colours = extract_colour_table(rtf_content)
         debug_print(f"Fonts extracted: {fonts}")
         
-        global json_dictionary
         json_dictionary = {}
         data = []
         json_dictionary ['fonts'] = fonts
@@ -404,9 +414,7 @@ def convert_rtf(item, file_no, output_directory):
         page_breaks = extract_page_breaks(rtf_content)
         debug_print(f"Page breaks found: {page_breaks}")
 
-        global PAGE
         PAGE = 0
-        global NUMPAGES
         NUMPAGES = rtf_content.count("NUMPAGES")
         for i in range(len(page_breaks)-1) :
 
@@ -419,6 +427,7 @@ def convert_rtf(item, file_no, output_directory):
 
     except Exception as e:
         debug_print("Error, cannot be converted due to " + str(e))
-        logging.write_exceptions(datetime.now().isoformat() + "\n" + item+" cannot be converted due to " + str(e) + "\n")
+        logging.write_exceptions(datetime.now().isoformat() + "\n" + item +
+                                 " cannot be converted due to " + str(e) + "\n")
         return "Failed", "Not in Scope"
     
